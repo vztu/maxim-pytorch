@@ -24,6 +24,8 @@ This repo is a PyTorch re-implementation of [**CVPR 2022 Oral**] paper: ["**MAXI
 
 Google Research, University of Texas at Austin
 
+*__Disclaimer__: This repo is currently working in progress. No timelines are guaranteed.*
+
 #### News
 - **April 12, 2022:** Initialize PyTorch repo for MAXIM.
 - **March 29, 2022:** The official JAX code and models have been released at [[google-research/maxim]](https://github.com/google-research/maxim)
