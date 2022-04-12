@@ -1,174 +1,208 @@
+# [MAXIM](https://arxiv.org/abs/2201.02973): Multi-Axis MLP for Image Processing (CVPR 2022 Oral)
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/restormer-efficient-transformer-for-high/single-image-deraining-on-test100)](https://paperswithcode.com/sota/single-image-deraining-on-test100?p=restormer-efficient-transformer-for-high)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/restormer-efficient-transformer-for-high/single-image-deraining-on-rain100h)](https://paperswithcode.com/sota/single-image-deraining-on-rain100h?p=restormer-efficient-transformer-for-high)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/restormer-efficient-transformer-for-high/single-image-deraining-on-rain100l)](https://paperswithcode.com/sota/single-image-deraining-on-rain100l?p=restormer-efficient-transformer-for-high)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/restormer-efficient-transformer-for-high/single-image-deraining-on-test1200)](https://paperswithcode.com/sota/single-image-deraining-on-test1200?p=restormer-efficient-transformer-for-high)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/restormer-efficient-transformer-for-high/single-image-deraining-on-test2800)](https://paperswithcode.com/sota/single-image-deraining-on-test2800?p=restormer-efficient-transformer-for-high)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/deblurring-on-hide-trained-on-gopro)](https://paperswithcode.com/sota/deblurring-on-hide-trained-on-gopro?p=maxim-multi-axis-mlp-for-image-processing)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/deblurring-on-gopro)](https://paperswithcode.com/sota/deblurring-on-gopro?p=maxim-multi-axis-mlp-for-image-processing)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/deblurring-on-realblur-j-1)](https://paperswithcode.com/sota/deblurring-on-realblur-j-1?p=maxim-multi-axis-mlp-for-image-processing)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/deblurring-on-realblur-r)](https://paperswithcode.com/sota/deblurring-on-realblur-r?p=maxim-multi-axis-mlp-for-image-processing)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/deblurring-on-realblur-j-trained-on-gopro)](https://paperswithcode.com/sota/deblurring-on-realblur-j-trained-on-gopro?p=maxim-multi-axis-mlp-for-image-processing)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/deblurring-on-realblur-r-trained-on-gopro)](https://paperswithcode.com/sota/deblurring-on-realblur-r-trained-on-gopro?p=maxim-multi-axis-mlp-for-image-processing)
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/restormer-efficient-transformer-for-high/image-denoising-on-sidd)](https://paperswithcode.com/sota/image-denoising-on-sidd?p=restormer-efficient-transformer-for-high)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/restormer-efficient-transformer-for-high/image-denoising-on-dnd)](https://paperswithcode.com/sota/image-denoising-on-dnd?p=restormer-efficient-transformer-for-high)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/low-light-image-enhancement-on-lol)](https://paperswithcode.com/sota/low-light-image-enhancement-on-lol?p=maxim-multi-axis-mlp-for-image-processing)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/photo-retouching-on-mit-adobe-5k)](https://paperswithcode.com/sota/photo-retouching-on-mit-adobe-5k?p=maxim-multi-axis-mlp-for-image-processing)
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/restormer-efficient-transformer-for-high/deblurring-on-gopro)](https://paperswithcode.com/sota/deblurring-on-gopro?p=restormer-efficient-transformer-for-high)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/restormer-efficient-transformer-for-high/deblurring-on-hide-trained-on-gopro)](https://paperswithcode.com/sota/deblurring-on-hide-trained-on-gopro?p=restormer-efficient-transformer-for-high)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/restormer-efficient-transformer-for-high/deblurring-on-realblur-r-trained-on-gopro)](https://paperswithcode.com/sota/deblurring-on-realblur-r-trained-on-gopro?p=restormer-efficient-transformer-for-high)
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/restormer-efficient-transformer-for-high/deblurring-on-realblur-j-trained-on-gopro)](https://paperswithcode.com/sota/deblurring-on-realblur-j-trained-on-gopro?p=restormer-efficient-transformer-for-high)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/single-image-deraining-on-rain100h)](https://paperswithcode.com/sota/single-image-deraining-on-rain100h?p=maxim-multi-axis-mlp-for-image-processing)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/single-image-deraining-on-rain100l)](https://paperswithcode.com/sota/single-image-deraining-on-rain100l?p=maxim-multi-axis-mlp-for-image-processing)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/single-image-deraining-on-test100)](https://paperswithcode.com/sota/single-image-deraining-on-test100?p=maxim-multi-axis-mlp-for-image-processing)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/single-image-deraining-on-test2800)](https://paperswithcode.com/sota/single-image-deraining-on-test2800?p=maxim-multi-axis-mlp-for-image-processing)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/single-image-deraining-on-test1200)](https://paperswithcode.com/sota/single-image-deraining-on-test1200?p=maxim-multi-axis-mlp-for-image-processing)
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/image-denoising-on-sidd)](https://paperswithcode.com/sota/image-denoising-on-sidd?p=maxim-multi-axis-mlp-for-image-processing)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/maxim-multi-axis-mlp-for-image-processing/image-denoising-on-dnd)](https://paperswithcode.com/sota/image-denoising-on-dnd?p=maxim-multi-axis-mlp-for-image-processing)
 
 
+This repo is a PyTorch re-implementation of [**CVPR 2022 Oral**] paper: ["**MAXIM**: Multi-Axis MLP for Image Processing"](https://arxiv.org/abs/2201.02973) by [Zhengzhong Tu](https://www.linkedin.com/in/vztu/), [Hossein Talebi](https://scholar.google.com/citations?hl=en&user=UOX9BigAAAAJ), [Han Zhang](https://sites.google.com/view/hanzhang), [Feng Yang](https://sites.google.com/view/feng-yang), [Peyman Milanfar](https://sites.google.com/view/milanfarhome/), [Alan Bovik](https://www.ece.utexas.edu/people/faculty/alan-bovik), and [Yinxiao Li](https://scholar.google.com/citations?user=kZsIU74AAAAJ&hl=en)
 
-# Restormer: Efficient Transformer for High-Resolution Image Restoration (CVPR 2022 -- Oral)
-
-[Syed Waqas Zamir](https://scholar.google.es/citations?user=WNGPkVQAAAAJ&hl=en), [Aditya Arora](https://adityac8.github.io/), [Salman Khan](https://salman-h-khan.github.io/), [Munawar Hayat](https://scholar.google.com/citations?user=Mx8MbWYAAAAJ&hl=en), [Fahad Shahbaz Khan](https://scholar.google.es/citations?user=zvaeYnUAAAAJ&hl=en), and [Ming-Hsuan Yang](https://scholar.google.com/citations?user=p9-ohHsAAAAJ&hl=en)
-
-[![paper](https://img.shields.io/badge/arXiv-Paper-<COLOR>.svg)](https://arxiv.org/abs/2111.09881)
-[![supplement](https://img.shields.io/badge/Supplementary-Material-red)](https://drive.google.com/file/d/1oKGON8vG4uDWMmZKqHeTMnFowhOubifK/view?usp=sharing)
-
+Google Research, University of Texas at Austin
 
 #### News
-- **April 4, 2022:** Integrated into [Huggingface Spaces 🤗](https://huggingface.co/spaces) using [Gradio](https://github.com/gradio-app/gradio). Try out the web demo: [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/swzamir/Restormer)
-- **March 30, 2022:** Added Colab Demo. [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1C2818h7KnjNv4R1sabe14_AYL7lWhmu6?usp=sharing)
-- **March 29, 2022:** Restormer is selected for an ORAL presentation at CVPR 2022 :dizzy:
-- **March 10, 2022:** Training codes are released :fire:
-- **March 3, 2022:** Paper accepted at CVPR 2022 :tada: 
-- **Nov 21, 2021:** Testing codes and pre-trained models are released!
+- **April 12, 2022:** Initialize PyTorch repo for MAXIM.
+- **March 29, 2022:** The official JAX code and models have been released at [[google-research/maxim]](https://github.com/google-research/maxim)
+- **March 29, 2022:** MAXIM is selected for an **ORAL presentation** at CVPR 2022 :tada:
+- **March 3, 2022:** Paper accepted at CVPR 2022.
 
 <hr />
 
-> **Abstract:** *Since convolutional neural networks (CNNs) perform well at learning generalizable image priors from large-scale data, these models have been extensively applied to image restoration and related tasks. Recently, another class of neural architectures, Transformers, have shown significant performance gains on natural language and high-level vision tasks. While the Transformer model mitigates the shortcomings of CNNs (i.e., limited receptive field and inadaptability to input content), its computational complexity grows quadratically with the spatial resolution, therefore making it infeasible to apply to most image restoration tasks involving high-resolution images. In this work, we propose an efficient Transformer model by making several key designs in the building blocks (multi-head attention and feed-forward network) such that it can capture long-range pixel interactions, while still remaining applicable to large images. Our model, named Restoration Transformer (Restormer), achieves state-of-the-art results on several image restoration tasks, including image deraining, single-image motion deblurring, defocus deblurring (single-image and dual-pixel data), and image denoising (Gaussian grayscale/color denoising, and real image denoising).* 
+> **Abstract:** *Recent progress on Transformers and multi-layer perceptron (MLP) models provide new network architectural designs for computer vision tasks. Although these models proved to be effective in many vision tasks such as image recognition, there remain challenges in adapting them for low-level vision. The inflexibility to support high-resolution images and limitations of local attention are perhaps the main bottlenecks. In this work, we present a multi-axis MLP based architecture called MAXIM, that can serve as an efficient and flexible general-purpose vision backbone for image processing tasks. MAXIM uses a UNet-shaped hierarchical structure and supports long-range interactions enabled by spatially-gated MLPs. Specifically, MAXIM contains two MLP-based building blocks: a multi-axis gated MLP that allows for efficient and scalable spatial mixing of local and global visual cues, and a cross-gating block, an alternative to cross-attention, which accounts for cross-feature conditioning. Both these modules are exclusively based on MLPs, but also benefit from being both global and `fully-convolutional', two properties that are desirable for image processing. Our extensive experimental results show that the proposed MAXIM model achieves state-of-the-art performance on more than ten benchmarks across a range of image processing tasks, including denoising, deblurring, deraining, dehazing, and enhancement while requiring fewer or comparable numbers of parameters and FLOPs than competitive models.*
 <hr />
 
-## Network Architecture
+## Architecture
 
-<img src = "https://i.imgur.com/ulLoEig.png"> 
+![Model overview](images/overview.png)
 
 ## Installation
 
-See [INSTALL.md](INSTALL.md) for the installation of dependencies required to run Restormer.
+TBD
+
+<!-- Install dependencies:
+
+```
+pip install -r requirements.txt
+``` -->
+
+## Results and Pre-trained models
+
+TBD
+
+<!-- We provide all the pre-trained models and visual results.
+
+| Task | Dataset | PSRN | SSIM | Model | #params | FLOPs | ckpt | outputs |
+|:---:|:---:|:---:|:---:| :---:|:---:|:---:|:---:|:---:|
+| Denoising | SIDD | 39.96 | 0.960 | MAXIM-3S | 22.2M | 339G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Denoising/SIDD/) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Denoising/SIDD/) |
+| Denoising | DND  | 39.84 | 0.954 | MAXIM-3S | 22.2M | 339G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Denoising/SIDD/) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Denoising/DND/) |
+| Deblurring | GoPro | 32.86 | 0.961 | MAXIM-3S | 22.2M | 339G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Deblurring/GoPro) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Deblurring/GoPro/) |
+| Deblurring | HIDE  | 32.83 | 0.956 | MAXIM-3S | 22.2M | 339G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Deblurring/GoPro) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Deblurring/GoPro/) |
+| Deblurring | REDS  | 28.93 | 0.865 | MAXIM-3S | 22.2M | 339G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Deblurring/REDS) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Deblurring/REDS/) |
+| Deblurring | RealBlur-R | 39.45 | 0.962 | MAXIM-3S | 22.2M | 339G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Deblurring/RealBlur_R) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Deblurring/RealBlur/) |
+| Deblurring | RealBlur-J | 32.84 | 0.935 | MAXIM-3S | 22.2M | 339G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Deblurring/RealBlur_J) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Deblurring/RealBlur/) |
+| Deraining | Rain13k | 33.24 | 0.933 | MAXIM-2S | 14.1M | 216G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Deraining/Rain13k) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Deraining/Rain13k/) |
+| Deraining | Raindrop | 31.87 | 0.935 | MAXIM-2S | 14.1M | 216G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Deraining/Raindrop) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Deraining/Raindrop/) |
+| Dehazing | RESIDE-Indoor | 38.11 | 0.991 | MAXIM-2S | 14.1M | 216G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Dehazing/SOTS-Indoor) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Dehazing/RESIDE-Indoor/) |
+| Dehazing | RESIDE-Outdoor | 34.19 | 0.985 | MAXIM-2S | 14.1M | 216G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Dehazing/SOTS-Outdoor) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Dehazing/RESIDE-Outdoor/) |
+| Enhancement | LOL | 23.43 | 0.863 | MAXIM-2S | 14.1M | 216G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Enhancement/LOL) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Enhancement/LOL/) |
+| Enhancement | FiveK | 26.15 | 0.945 | MAXIM-2S | 14.1M  |  216G | [ckpt](https://console.cloud.google.com/storage/browser/gresearch/maxim/ckpt/Enhancement/FiveK) | [images](https://console.cloud.google.com/storage/browser/gresearch/maxim/results/Enhancement/FiveK/) | -->
+
 
 ## Demo
 
-To test the pre-trained Restormer models of [Deraining](https://drive.google.com/drive/folders/1ZEDDEVW0UgkpWi-N4Lj_JUoVChGXCu_u), [Motion Deblurring](https://drive.google.com/drive/folders/1czMyfRTQDX3j3ErByYeZ1PM4GVLbJeGK), [Defocus Deblurring](https://drive.google.com/drive/folders/1bRBG8DG_72AGA6-eRePvChlT5ZO4cwJ4?usp=sharing), and [Denoising](https://drive.google.com/drive/folders/1Qwsjyny54RZWa7zC4Apg7exixLBo4uF0) on your own images, you can either use Google Colab [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1C2818h7KnjNv4R1sabe14_AYL7lWhmu6?usp=sharing), or command line as following
+<!-- First download corresponding checkpoints and then go ahead and run:
+
+<details>
+  <summary><strong>Image Denoising</strong> (click to expand) </summary>
+
 ```
-python demo.py --task Task_Name --input_dir path_to_images --result_dir save_images_here
+python3 maxim/run_eval.py --task Denoising --ckpt_path ${SIDD_CKPT_PATH} \
+  --input_dir maxim/images/Denoising --output_dir maxim/images/Results --has_target=False
 ```
-Example usage to perform Defocus Deblurring on a directory of images:
+</details>
+
+<details>
+  <summary><strong>Image Deblurring</strong> (click to expand) </summary>
+
 ```
-python demo.py --task Single_Image_Defocus_Deblurring --input_dir './demo/degraded/' --result_dir './demo/restored/'
+python3 maxim/run_eval.py --task Deblurring --ckpt_path ${GOPRO_CKPT_PATH} \
+  --input_dir maxim/images/Deblurring --output_dir maxim/images/Results --has_target=False
 ```
-Example usage to perform Defocus Deblurring on an image directly:
+</details>
+
+<details>
+  <summary><strong>Image Deraining</strong> (click to expand) </summary>
+
+Rain streak:
 ```
-python demo.py --task Single_Image_Defocus_Deblurring --input_dir './demo/degraded/portrait.jpg' --result_dir './demo/restored/'
+python3 maxim/run_eval.py --task Deraining --ckpt_path ${RAIN13K_CKPT_PATH} \
+  --input_dir maxim/images/Deraining --output_dir maxim/images/Results --has_target=False
 ```
 
-## Training and Evaluation
+Rain drop:
+```
+python3 maxim/run_eval.py --task Deraining --ckpt_path ${RAINDROP_CKPT_PATH} \
+  --input_dir maxim/images/Deraining --output_dir maxim/images/Results --has_target=False
+```
+</details>
 
-Training and Testing instructions for Deraining, Motion Deblurring, Defocus Deblurring, and Denoising are provided in their respective directories. Here is a summary table containing hyperlinks for easy navigation:
+<details>
+  <summary><strong>Image Dehazing</strong> (click to expand) </summary>
+
+Indoor:
+```
+python3 maxim/run_eval.py --task Dehazing --ckpt_path ${REDISE_INDOOR_CKPT_PATH} \
+  --input_dir maxim/images/Dehazing --output_dir maxim/images/Results --has_target=False
+```
+
+Outdoor:
+```
+python3 maxim/run_eval.py --task Dehazing --ckpt_path ${REDISE_OUTDOOR_CKPT_PATH} \
+  --input_dir maxim/images/Dehazing --output_dir maxim/images/Results --has_target=False
+```
+</details>
+
+<details>
+  <summary><strong>Image Enhancement</strong> (click to expand) </summary>
+
+Low-light enhancement:
+```
+python3 maxim/run_eval.py --task Enhancement --ckpt_path ${LOL_CKPT_PATH} \
+  --input_dir maxim/images/Enhancement --output_dir maxim/images/Results --has_target=False
+```
+
+Retouching:
+```
+python3 maxim/run_eval.py --task Dehazing --ckpt_path ${FIVEK_CKPT_PATH} \
+  --input_dir maxim/images/Enhancement --output_dir maxim/images/Results --has_target=False
+```
+</details> -->
+
+## Results
+
+<details>
+  <summary><strong>Image Denoising</strong> (click to expand) </summary>
+
+<img src = "https://user-images.githubusercontent.com/43280278/149262475-a73668f2-9fe1-4374-8ed3-4831acca8052.png" width="400">
+</details>
+
+<details>
+<summary><strong>Image Deblurring</strong> (click to expand) </summary>
 
 <table>
   <tr>
-    <th align="left">Task</th>
-    <th align="center">Training Instructions</th>
-    <th align="center">Testing Instructions</th>
-    <th align="center">Restormer's Visual Results</th>
+    <td> <img src = "https://user-images.githubusercontent.com/43280278/149261823-b77e9513-b3b5-4caf-a0eb-67bf18c2f681.png" width="500"> </td>
+    <td> <img src = "https://user-images.githubusercontent.com/43280278/149261858-24664c33-dc8a-47c3-b84d-ba64b1c05937.png" width="500"> </td>
   </tr>
   <tr>
-    <td align="left">Deraining</td>
-    <td align="center"><a href="Deraining/README.md#training">Link</a></td>
-    <td align="center"><a href="Deraining/README.md#evaluation">Link</a></td>
-    <td align="center"><a href="https://drive.google.com/drive/folders/1HcLc6v03q_sP_lRPcl7_NJmlB9f48TWU?usp=sharing">Download</a></td>
-  </tr>
-  <tr>
-    <td>Motion Deblurring</td>
-    <td align="center"><a href="Motion_Deblurring/README.md#training">Link</a></td>
-    <td align="center"><a href="Motion_Deblurring/README.md#evaluation">Link</a></td>
-    <td align="center"><a href="https://drive.google.com/drive/folders/1qla3HEOuGapv1hqBwXEMi2USFPB2qmx_?usp=sharing">Download</a></td>
-  </tr>
-  <tr>
-    <td>Defocus Deblurring</td>
-    <td align="center"><a href="Defocus_Deblurring/README.md#training">Link</a></td>
-    <td align="center"><a href="Defocus_Deblurring/README.md#evaluation">Link</a></td>
-    <td align="center"><a href="https://drive.google.com/drive/folders/1V_pLc9CZFe4vN7c4SxtXsXKi2FnLUt98?usp=sharing">Download</a></td>
-  </tr>
-  <tr>
-    <td>Gaussian Denoising</td>
-    <td align="center"><a href="Denoising/README.md#training">Link</a></td>
-    <td align="center"><a href="Denoising/README.md#evaluation">Link</a></td>
-    <td align="center"><a href="https://drive.google.com/drive/folders/1rEAHUBkA9uCe9Q0AzI5zkYxePSgxYDEG?usp=sharing">Download</a></td>
-  </tr>
-  <tr>
-    <td>Real Denoising</td>
-    <td align="center"><a href="Denoising/README.md#training-1">Link</a></td>
-    <td align="center"><a href="Denoising/README.md#evaluation-1">Link</a></td>
-    <td align="center"><a href="https://drive.google.com/file/d/1CsEiN6R0hlmEoSTyy48nnhfF06P5aRR7/view?usp=sharing">Download</a></td>
+    <td><p align="center"><b>Synthetic blur</b></p></td>
+    <td><p align="center"><b>Realistic blur</b></p></td>
   </tr>
 </table>
-
-## Results
-Experiments are performed for different image processing tasks including, image deraining, single-image motion deblurring, defocus deblurring (both on single image and dual pixel data), and image denoising (both on Gaussian and real data). 
+</details>
 
 <details>
 <summary><strong>Image Deraining</strong> (click to expand) </summary>
 
-<img src = "https://i.imgur.com/mMoqYJi.png"> 
-</details>
-
-<details>
-<summary><strong>Single-Image Motion Deblurring</strong> (click to expand) </summary>
-
-<p align="center"><img src = "https://i.imgur.com/htagDSl.png" width="400"></p></details>
-
-<details>
-<summary><strong>Defocus Deblurring</strong> (click to expand) </summary>
-
-S: single-image defocus deblurring.
-D: dual-pixel defocus deblurring.
-
-<img src = "https://i.imgur.com/sfKnLG2.png"> 
-</details>
-
-
-<details>
-<summary><strong>Gaussian Image Denoising</strong> (click to expand) </summary>
-
-Top super-row: learning a single model to handle various noise levels.
-Bottom super-row: training a separate model for each noise level.
-
 <table>
   <tr>
-    <td> <img src = "https://i.imgur.com/4vzV8Qy.png" width="400"> </td>
-    <td> <img src = "https://i.imgur.com/Sx986Xs.png" width="500"> </td>
+    <td> <img src = "https://user-images.githubusercontent.com/43280278/149261908-8bce72cf-b343-4bf8-8462-8be363616cfa.png" width="700"> </td>
+    <td> <p align="top"> <img src = "https://user-images.githubusercontent.com/43280278/149262066-7b93538a-2ccc-4ea0-9187-ef1b54734392.png" width="400"> </td>
   </tr>
   <tr>
-    <td><p align="center"><b>Grayscale</b></p></td>
-    <td><p align="center"><b>Color</b></p></td>
+    <td><p align="center"><b>Rain streak</b></p></td>
+    <td><p align="center"><b>Rain drop</b></p></td>
   </tr>
 </table>
 </details>
 
 <details>
-<summary><strong>Real Image Denoising</strong> (click to expand) </summary>
+<summary><strong>Image Dehazing</strong> (click to expand) </summary>
 
-<img src = "https://i.imgur.com/6v5PRxj.png">
+<img src = "https://user-images.githubusercontent.com/43280278/149261947-22954827-ce62-44e8-974a-0aa8d94a4bd9.png"  width="250">
+</details>
+
+<details>
+<summary><strong>Image Enhancement</strong> (click to expand) </summary>
+
+<img src = "https://user-images.githubusercontent.com/43280278/149262540-77d16592-9305-4fd7-80c6-b9d30000cc29.png" width="400">
 </details>
 
 ## Citation
-If you use Restormer, please consider citing:
+Should you find this repository useful, please consider citing:
+```
+@article{tu2022maxim,
+  title={MAXIM: Multi-Axis MLP for Image Processing},
+  author={Tu, Zhengzhong and Talebi, Hossein and Zhang, Han and Yang, Feng and Milanfar, Peyman and Bovik, Alan and Li, Yinxiao},
+  journal={CVPR},
+  year={2022},
+}
+```
 
-    @inproceedings{Zamir2021Restormer,
-        title={Restormer: Efficient Transformer for High-Resolution Image Restoration}, 
-        author={Syed Waqas Zamir and Aditya Arora and Salman Khan and Munawar Hayat 
-                and Fahad Shahbaz Khan and Ming-Hsuan Yang},
-        booktitle={CVPR},
-        year={2022}
-    }
+## Acknowledgement
 
-
-## Contact
-Should you have any question, please contact waqas.zamir@inceptioniai.org
-
-
-**Acknowledgment:** This code is based on the [BasicSR](https://github.com/xinntao/BasicSR) toolbox. 
-
-## Our Related Works
-- Multi-Stage Progressive Image Restoration, CVPR 2021. [Paper](https://arxiv.org/abs/2102.02808) | [Code](https://github.com/swz30/MPRNet)
-- Learning Enriched Features for Real Image Restoration and Enhancement, ECCV 2020. [Paper](https://arxiv.org/abs/2003.06792) | [Code](https://github.com/swz30/MIRNet)
-- CycleISP: Real Image Restoration via Improved Data Synthesis, CVPR 2020. [Paper](https://arxiv.org/abs/2003.07761) | [Code](https://github.com/swz30/CycleISP)
+This repository is built on [Restormer](https://github.com/swz30/Restormer). Our work is also inspired by [HiT](https://github.com/google-research/hit-gan), [MPRNet](https://github.com/swz30/MPRNet), and [HINet](https://github.com/megvii-model/HINet).
