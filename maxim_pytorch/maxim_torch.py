@@ -467,14 +467,13 @@ class CrossGatingBlock(nn.Module):  #input shape: n, c, h, w
 
 class UNetEncoderBlock(nn.Module):  #input shape: n, c, h, w (pytorch default)
     """Encoder block in MAXIM."""
-    def __init__(self, cin, num_channels, block_size, grid_size, dec=False, num_groups=1, lrelu_slope=0.2,block_gmlp_factor=2, grid_gmlp_factor=2,
+    def __init__(self, cin, num_channels, block_size, grid_size, dec=False, lrelu_slope=0.2,block_gmlp_factor=2, grid_gmlp_factor=2,
                 input_proj_factor=2, channels_reduction=4, dropout_rate=0., use_bias=True,downsample=True,use_global_mlp=True):
         super().__init__()
         self.cin = cin
         self.num_channels = num_channels
         self.block_size = block_size
         self.grid_size = grid_size
-        self.num_groups = num_groups
         self.lrelu_slope = lrelu_slope
         self.block_gmlp_factor = block_gmlp_factor
         self.grid_gmlp_factor = grid_gmlp_factor
@@ -521,14 +520,13 @@ class UNetEncoderBlock(nn.Module):  #input shape: n, c, h, w (pytorch default)
 
 class UNetDecoderBlock(nn.Module):  #input shape: n, c, h, w
     """Decoder block in MAXIM."""
-    def __init__(self, cin, num_channels, block_size, grid_size, num_groups=1, lrelu_slope=0.2, block_gmlp_factor=2, grid_gmlp_factor=2,
+    def __init__(self, cin, num_channels, block_size, grid_size, lrelu_slope=0.2, block_gmlp_factor=2, grid_gmlp_factor=2,
                  input_proj_factor=2, channels_reduction=4, dropout_rate=0., use_bias=True, downsample=True, use_global_mlp=True):
         super().__init__()
         self.cin = cin
         self.num_channels = num_channels
         self.block_size = block_size
         self.grid_size = grid_size
-        self.num_groups = num_groups
         self.lrelu_slope = lrelu_slope
         self.block_gmlp_factor = block_gmlp_factor
         self.grid_gmlp_factor = grid_gmlp_factor
@@ -539,7 +537,7 @@ class UNetDecoderBlock(nn.Module):  #input shape: n, c, h, w
         self.downsample = downsample
         self.use_global_mlp = use_global_mlp
         self.ConvTranspose_0 = nn.ConvTranspose2d(self.cin,self.num_channels,kernel_size=(2,2),stride=2,bias=self.use_bias)
-        self.UNetEncoderBlock_0 = UNetEncoderBlock(4*self.num_channels, self.num_channels, self.block_size, self.grid_size, num_groups=self.num_groups, lrelu_slope=self.lrelu_slope,
+        self.UNetEncoderBlock_0 = UNetEncoderBlock(4*self.num_channels, self.num_channels, self.block_size, self.grid_size, lrelu_slope=self.lrelu_slope,
                 block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor, dec = True,
                 input_proj_factor=self.input_proj_factor, channels_reduction=self.reduction, dropout_rate=self.dropout_rate, use_bias=self.use_bias,downsample=False,use_global_mlp=self.use_global_mlp)
     def forward(self, x, bridge=None):
@@ -549,12 +547,11 @@ class UNetDecoderBlock(nn.Module):  #input shape: n, c, h, w
 
 class BottleneckBlock(nn.Module):  #input shape: n,c,h,w
     """The bottleneck block consisting of multi-axis gMLP block and RDCAB."""
-    def __init__(self,features, block_size, grid_size,num_groups=1,block_gmlp_factor=2,grid_gmlp_factor=2,input_proj_factor=2,channels_reduction=4,use_bias=True, dropout_rate=0.):
+    def __init__(self,features, block_size, grid_size,block_gmlp_factor=2,grid_gmlp_factor=2,input_proj_factor=2,channels_reduction=4,use_bias=True, dropout_rate=0.):
         super().__init__()
         self.features = features
         self.block_size = block_size
         self.grid_size = grid_size
-        self.num_groups = num_groups
         self.block_gmlp_factor = block_gmlp_factor
         self.grid_gmlp_factor = grid_gmlp_factor
         self.input_proj_factor = input_proj_factor
@@ -625,63 +622,57 @@ class SAM(nn.Module):  #x shape and x_image shape: n, c, h, w
 
 #top: 3-stage MAXIM for image denoising
 class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w   
-  """The MAXIM model function with multi-stage and multi-scale supervision.
-  For more model details, please check the CVPR paper:
-  MAXIM: MUlti-Axis MLP for Image Processing (https://arxiv.org/abs/2201.02973)
-  Attributes:
-    features: initial hidden dimension for the input resolution.
-    depth: the number of downsampling depth for the model.
-    num_stages: how many stages to use. It will also affects the output list.
-    num_groups: how many blocks each stage contains.
-    use_bias: whether to use bias in all the conv/mlp layers.
-    num_supervision_scales: the number of desired supervision scales.
-    lrelu_slope: the negative slope parameter in leaky_relu layers.
-    use_global_mlp: whether to use the multi-axis gated MLP block (MAB) in each
-      layer.
-    use_cross_gating: whether to use the cross-gating MLP block (CGB) in the
-      skip connections and multi-stage feature fusion layers.
-    high_res_stages: how many stages are specificied as high-res stages. The
-      rest (depth - high_res_stages) are called low_res_stages.
-    block_size_hr: the block_size parameter for high-res stages.
-    block_size_lr: the block_size parameter for low-res stages.
-    grid_size_hr: the grid_size parameter for high-res stages.
-    grid_size_lr: the grid_size parameter for low-res stages.
-    num_bottleneck_blocks: how many bottleneck blocks.
-    block_gmlp_factor: the input projection factor for block_gMLP layers.
-    grid_gmlp_factor: the input projection factor for grid_gMLP layers.
-    input_proj_factor: the input projection factor for the MAB block.
-    channels_reduction: the channel reduction factor for SE layer.
-    num_outputs: the output channels.
-    dropout_rate: Dropout rate.
-  Returns:
-    The output contains a list of arrays consisting of multi-stage multi-scale
-    outputs. For example, if num_stages = num_supervision_scales = 3 (the
-    model used in the paper), the output specs are: outputs =
-    [[output_stage1_scale1, output_stage1_scale2, output_stage1_scale3],
-     [output_stage2_scale1, output_stage2_scale2, output_stage2_scale3],
-     [output_stage3_scale1, output_stage3_scale2, output_stage3_scale3],]
-    The final output can be retrieved by outputs[-1][-1].
-  """
-    def __init__(self,features=32,depth=3,num_stages=2,num_groups=1, use_bias=True, num_supervision_scales=int(3), lrelu_slope=0.2,
-                 use_global_mlp=True,use_cross_gating=True,high_res_stages=2,block_size_hr=(16,16),block_size_lr=(8,8),
-                 grid_size_hr=(16, 16),grid_size_lr=(8, 8),num_bottleneck_blocks=1,
+    """The MAXIM model function with multi-stage and multi-scale supervision.
+    For more model details, please check the CVPR paper:
+    MAXIM: MUlti-Axis MLP for Image Processing (https://arxiv.org/abs/2201.02973)
+    Attributes:
+      features: initial hidden dimension for the input resolution.
+      depth: the number of downsampling depth for the model.
+      num_stages: how many stages to use. It will also affects the output list.
+      use_bias: whether to use bias in all the conv/mlp layers.
+      num_supervision_scales: the number of desired supervision scales.
+      lrelu_slope: the negative slope parameter in leaky_relu layers.
+      use_global_mlp: whether to use the multi-axis gated MLP block (MAB) in each
+        layer.
+      use_cross_gating: whether to use the cross-gating MLP block (CGB) in the
+        skip connections and multi-stage feature fusion layers.
+      high_res_stages: how many stages are specificied as high-res stages. The
+        rest (depth - high_res_stages) are called low_res_stages.
+      block_size_hr: the block_size parameter for high-res stages.
+      block_size_lr: the block_size parameter for low-res stages.
+      grid_size_hr: the grid_size parameter for high-res stages.
+      grid_size_lr: the grid_size parameter for low-res stages.
+      block_gmlp_factor: the input projection factor for block_gMLP layers.
+      grid_gmlp_factor: the input projection factor for grid_gMLP layers.
+      input_proj_factor: the input projection factor for the MAB block.
+      channels_reduction: the channel reduction factor for SE layer.
+      num_outputs: the output channels.
+      dropout_rate: Dropout rate.
+    Returns:
+      The output contains a list of arrays consisting of multi-stage multi-scale
+      outputs. For example, if num_stages = num_supervision_scales = 3 (the
+      model used in the paper), the output specs are: outputs =
+      [[output_stage1_scale1, output_stage1_scale2, output_stage1_scale3],
+       [output_stage2_scale1, output_stage2_scale2, output_stage2_scale3],
+       [output_stage3_scale1, output_stage3_scale2, output_stage3_scale3],]
+      The final output can be retrieved by outputs[-1][-1].
+    """
+    def __init__(self,features=32,depth=3, use_bias=True, num_supervision_scales=int(3), lrelu_slope=0.2,
+                 use_global_mlp=True,high_res_stages=2,block_size_hr=(16,16),block_size_lr=(8,8),
+                 grid_size_hr=(16, 16),grid_size_lr=(8, 8),
                 block_gmlp_factor=2, grid_gmlp_factor=2,input_proj_factor=2, channels_reduction=4, num_outputs=3, dropout_rate=0.):
         super().__init__()
         self.features = features
         self.depth = depth
-        self.num_stages = num_stages
-        self.num_groups = num_groups
         self.bias = use_bias
         self.num_supervision_scales = num_supervision_scales
         self.lrelu_slope = lrelu_slope
         self.use_global_mlp = use_global_mlp
-        self.use_cross_gating = use_cross_gating
         self.high_res_stages = high_res_stages
         self.block_size_hr = block_size_hr
         self.block_size_lr = block_size_lr
         self.grid_size_hr = grid_size_hr
         self.grid_size_lr = grid_size_lr
-        self.num_bottleneck_blocks = num_bottleneck_blocks
         self.block_gmlp_factor = block_gmlp_factor
         self.grid_gmlp_factor = grid_gmlp_factor
         self.input_proj_factor = input_proj_factor
@@ -696,7 +687,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.stage_0_encoder_block_0 = UNetEncoderBlock(cin=2*self.features, num_channels=self.features, 
                 block_size=self.block_size_hr if 0 < self.high_res_stages else self.block_size_lr, 
                 grid_size=self.grid_size_hr if 0 < self.high_res_stages else self.block_size_lr, 
-                num_groups=self.num_groups, lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
+                lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
                 input_proj_factor=self.input_proj_factor, channels_reduction=self.channels_reduction, dropout_rate=self.drop, use_bias=self.bias,
                 downsample=True,use_global_mlp=self.use_global_mlp)
         #depth=1
@@ -704,7 +695,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.stage_0_encoder_block_1 = UNetEncoderBlock(cin = 3*self.features, num_channels=2*self.features, 
                 block_size=self.block_size_hr if 1 < self.high_res_stages else self.block_size_lr, 
                 grid_size=self.grid_size_hr if 1 < self.high_res_stages else self.block_size_lr, 
-                num_groups=self.num_groups, lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
+                lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
                 input_proj_factor=self.input_proj_factor, channels_reduction=self.channels_reduction, dropout_rate=self.drop, use_bias=self.bias,
                 downsample=True,use_global_mlp=self.use_global_mlp)
         #depth=2
@@ -712,16 +703,16 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.stage_0_encoder_block_2 = UNetEncoderBlock(cin=6*self.features, num_channels=4*self.features, 
                 block_size=self.block_size_hr if 2 < self.high_res_stages else self.block_size_lr, 
                 grid_size=self.grid_size_hr if 2 < self.high_res_stages else self.block_size_lr, 
-                num_groups=self.num_groups, lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
+                lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
                 input_proj_factor=self.input_proj_factor, channels_reduction=self.channels_reduction, dropout_rate=self.drop, use_bias=self.bias,
                 downsample=True,use_global_mlp=self.use_global_mlp)
 
         #bottleneck
         self.stage_0_global_block_0 = BottleneckBlock(block_size=self.block_size_lr,grid_size=self.grid_size_lr,features=4 * self.features,
-            num_groups=self.num_groups,block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
+            block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
             dropout_rate=self.drop,use_bias=self.bias,channels_reduction=self.channels_reduction)
         self.stage_0_global_block_1 = BottleneckBlock(block_size=self.block_size_lr,grid_size=self.grid_size_lr,features=4 * self.features,
-            num_groups=self.num_groups,block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
+            block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
             dropout_rate=self.drop,use_bias=self.bias,channels_reduction=self.channels_reduction)
 
         #cross gating (within a stage)
@@ -755,7 +746,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.UpSampleRatio_9 = UpSampleRatio(4 * self.features,ratio=2**(0),use_bias=self.bias)#2->2
         self.UpSampleRatio_10 = UpSampleRatio_2(2 * self.features,ratio=2**(-1),use_bias=self.bias)#1->2
         self.UpSampleRatio_11 = UpSampleRatio_4(1 * self.features,ratio=2**(-2),use_bias=self.bias)#0->2
-        self.stage_0_decoder_block_2 = UNetDecoderBlock(cin=4*self.features, num_channels=(2**2)*self.features,num_groups=self.num_groups,lrelu_slope=self.lrelu_slope,
+        self.stage_0_decoder_block_2 = UNetDecoderBlock(cin=4*self.features, num_channels=(2**2)*self.features,lrelu_slope=self.lrelu_slope,
             block_size=self.block_size_hr if 2 < self.high_res_stages else self.block_size_lr,
             grid_size=self.grid_size_hr if 2 < self.high_res_stages else self.block_size_lr,
             block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
@@ -765,7 +756,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.UpSampleRatio_12 = UpSampleRatio_1_2(4 * self.features,ratio=2**(1),use_bias=self.bias)#2->1
         self.UpSampleRatio_13 = UpSampleRatio(2 * self.features,ratio=2**(0),use_bias=self.bias)#1->1
         self.UpSampleRatio_14 = UpSampleRatio_2(1 * self.features,ratio=2**(-1),use_bias=self.bias)#0->1
-        self.stage_0_decoder_block_1 = UNetDecoderBlock(cin=4*self.features, num_channels=(2**1)*self.features,num_groups=self.num_groups,lrelu_slope=self.lrelu_slope,
+        self.stage_0_decoder_block_1 = UNetDecoderBlock(cin=4*self.features, num_channels=(2**1)*self.features,lrelu_slope=self.lrelu_slope,
             block_size=self.block_size_hr if 1 < self.high_res_stages else self.block_size_lr,
             grid_size=self.grid_size_hr if 1 < self.high_res_stages else self.block_size_lr,
             block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
@@ -775,7 +766,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.UpSampleRatio_15 = UpSampleRatio_1_4(4 * self.features,ratio=4,use_bias=self.bias)#2->0
         self.UpSampleRatio_16 = UpSampleRatio_1_2(2 * self.features,ratio=2,use_bias=self.bias)#1->0
         self.UpSampleRatio_17 = UpSampleRatio(1 * self.features,ratio=1,use_bias=self.bias)#0->0
-        self.stage_0_decoder_block_0 = UNetDecoderBlock(cin=2*self.features,num_channels=self.features,num_groups=self.num_groups,lrelu_slope=self.lrelu_slope,
+        self.stage_0_decoder_block_0 = UNetDecoderBlock(cin=2*self.features,num_channels=self.features,lrelu_slope=self.lrelu_slope,
             block_size=self.block_size_hr if 0 < self.high_res_stages else self.block_size_lr,
             grid_size=self.grid_size_hr if 0 < self.high_res_stages else self.block_size_lr,
             block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
@@ -794,7 +785,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.stage_1_encoder_block_0 = UNetEncoderBlock(cin=2*self.features, num_channels=self.features, 
                 block_size=self.block_size_hr if 0 < self.high_res_stages else self.block_size_lr, 
                 grid_size=self.grid_size_hr if 0 < self.high_res_stages else self.block_size_lr, 
-                num_groups=self.num_groups, lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
+                lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
                 input_proj_factor=self.input_proj_factor, channels_reduction=self.channels_reduction, dropout_rate=self.drop, use_bias=self.bias,
                 downsample=True,use_global_mlp=self.use_global_mlp)
         #depth=1
@@ -807,7 +798,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.stage_1_encoder_block_1 = UNetEncoderBlock(cin = 3*self.features, num_channels=2*self.features, 
                 block_size=self.block_size_hr if 1 < self.high_res_stages else self.block_size_lr, 
                 grid_size=self.grid_size_hr if 1 < self.high_res_stages else self.block_size_lr, 
-                num_groups=self.num_groups, lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
+                lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
                 input_proj_factor=self.input_proj_factor, channels_reduction=self.channels_reduction, dropout_rate=self.drop, use_bias=self.bias,
                 downsample=True,use_global_mlp=self.use_global_mlp)
         #depth=2
@@ -820,16 +811,16 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.stage_1_encoder_block_2 = UNetEncoderBlock(cin=6*self.features, num_channels=4*self.features, 
                 block_size=self.block_size_hr if 2 < self.high_res_stages else self.block_size_lr, 
                 grid_size=self.grid_size_hr if 2 < self.high_res_stages else self.block_size_lr, 
-                num_groups=self.num_groups, lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
+                lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
                 input_proj_factor=self.input_proj_factor, channels_reduction=self.channels_reduction, dropout_rate=self.drop, use_bias=self.bias,
                 downsample=True,use_global_mlp=self.use_global_mlp)
 
         #bottleneck
         self.stage_1_global_block_0 = BottleneckBlock(block_size=self.block_size_lr,grid_size=self.grid_size_lr,features=4 * self.features,
-            num_groups=self.num_groups,block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
+            block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
             dropout_rate=self.drop,use_bias=self.bias,channels_reduction=self.channels_reduction)
         self.stage_1_global_block_1 = BottleneckBlock(block_size=self.block_size_lr,grid_size=self.grid_size_lr,features=4 * self.features,
-            num_groups=self.num_groups,block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
+            block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
             dropout_rate=self.drop,use_bias=self.bias,channels_reduction=self.channels_reduction)
 
         #cross gating
@@ -863,7 +854,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.UpSampleRatio_27 = UpSampleRatio(4 * self.features,ratio=2**(0),use_bias=self.bias)#2->2
         self.UpSampleRatio_28 = UpSampleRatio_2(2 * self.features,ratio=2**(-1),use_bias=self.bias)#1->2
         self.UpSampleRatio_29 = UpSampleRatio_4(1 * self.features,ratio=2**(-2),use_bias=self.bias)#0->2
-        self.stage_1_decoder_block_2 = UNetDecoderBlock(cin=4*self.features, num_channels=(2**2)*self.features,num_groups=self.num_groups,lrelu_slope=self.lrelu_slope,
+        self.stage_1_decoder_block_2 = UNetDecoderBlock(cin=4*self.features, num_channels=(2**2)*self.features,lrelu_slope=self.lrelu_slope,
             block_size=self.block_size_hr if 2 < self.high_res_stages else self.block_size_lr,
             grid_size=self.grid_size_hr if 2 < self.high_res_stages else self.block_size_lr,
             block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
@@ -873,7 +864,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.UpSampleRatio_30 = UpSampleRatio_1_2(4 * self.features,ratio=2**(1),use_bias=self.bias)#2->1
         self.UpSampleRatio_31 = UpSampleRatio(2 * self.features,ratio=2**(0),use_bias=self.bias)#1->1
         self.UpSampleRatio_32 = UpSampleRatio_2(1 * self.features,ratio=2**(-1),use_bias=self.bias)#0->1
-        self.stage_1_decoder_block_1 = UNetDecoderBlock(cin=4*self.features, num_channels=(2**1)*self.features,num_groups=self.num_groups,lrelu_slope=self.lrelu_slope,
+        self.stage_1_decoder_block_1 = UNetDecoderBlock(cin=4*self.features, num_channels=(2**1)*self.features,lrelu_slope=self.lrelu_slope,
             block_size=self.block_size_hr if 1 < self.high_res_stages else self.block_size_lr,
             grid_size=self.grid_size_hr if 1 < self.high_res_stages else self.block_size_lr,
             block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
@@ -883,7 +874,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.UpSampleRatio_33 = UpSampleRatio_1_4(4 * self.features,ratio=4,use_bias=self.bias)#2->0
         self.UpSampleRatio_34 = UpSampleRatio_1_2(2 * self.features,ratio=2,use_bias=self.bias)#1->0
         self.UpSampleRatio_35 = UpSampleRatio(1 * self.features,ratio=1,use_bias=self.bias)#0->0
-        self.stage_1_decoder_block_0 = UNetDecoderBlock(cin=2*self.features,num_channels=self.features,num_groups=self.num_groups,lrelu_slope=self.lrelu_slope,
+        self.stage_1_decoder_block_0 = UNetDecoderBlock(cin=2*self.features,num_channels=self.features,lrelu_slope=self.lrelu_slope,
             block_size=self.block_size_hr if 0 < self.high_res_stages else self.block_size_lr,
             grid_size=self.grid_size_hr if 0 < self.high_res_stages else self.block_size_lr,
             block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
@@ -902,7 +893,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.stage_2_encoder_block_0 = UNetEncoderBlock(cin=2*self.features, num_channels=self.features, 
                 block_size=self.block_size_hr if 0 < self.high_res_stages else self.block_size_lr, 
                 grid_size=self.grid_size_hr if 0 < self.high_res_stages else self.block_size_lr, 
-                num_groups=self.num_groups, lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
+                lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
                 input_proj_factor=self.input_proj_factor, channels_reduction=self.channels_reduction, dropout_rate=self.drop, use_bias=self.bias,
                 downsample=True,use_global_mlp=self.use_global_mlp)
         #depth=1
@@ -915,7 +906,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.stage_2_encoder_block_1 = UNetEncoderBlock(cin = 3*self.features, num_channels=2*self.features, 
                 block_size=self.block_size_hr if 1 < self.high_res_stages else self.block_size_lr, 
                 grid_size=self.grid_size_hr if 1 < self.high_res_stages else self.block_size_lr, 
-                num_groups=self.num_groups, lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
+                lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
                 input_proj_factor=self.input_proj_factor, channels_reduction=self.channels_reduction, dropout_rate=self.drop, use_bias=self.bias,
                 downsample=True,use_global_mlp=self.use_global_mlp)
         #depth=2
@@ -928,16 +919,16 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.stage_2_encoder_block_2 = UNetEncoderBlock(cin=6*self.features, num_channels=4*self.features, 
                 block_size=self.block_size_hr if 2 < self.high_res_stages else self.block_size_lr, 
                 grid_size=self.grid_size_hr if 2 < self.high_res_stages else self.block_size_lr, 
-                num_groups=self.num_groups, lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
+                lrelu_slope=self.lrelu_slope, block_gmlp_factor=self.block_gmlp_factor, grid_gmlp_factor=self.grid_gmlp_factor,
                 input_proj_factor=self.input_proj_factor, channels_reduction=self.channels_reduction, dropout_rate=self.drop, use_bias=self.bias,
                 downsample=True,use_global_mlp=self.use_global_mlp)
 
         #bottleneck
         self.stage_2_global_block_0 = BottleneckBlock(block_size=self.block_size_lr,grid_size=self.grid_size_lr,features=4 * self.features,
-            num_groups=self.num_groups,block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
+            block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
             dropout_rate=self.drop,use_bias=self.bias,channels_reduction=self.channels_reduction)
         self.stage_2_global_block_1 = BottleneckBlock(block_size=self.block_size_lr,grid_size=self.grid_size_lr,features=4 * self.features,
-            num_groups=self.num_groups,block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
+            block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
             dropout_rate=self.drop,use_bias=self.bias,channels_reduction=self.channels_reduction)
 
         #cross gating
@@ -971,7 +962,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.UpSampleRatio_45 = UpSampleRatio(4 * self.features,ratio=2**(0),use_bias=self.bias)#2->2
         self.UpSampleRatio_46 = UpSampleRatio_2(2 * self.features,ratio=2**(-1),use_bias=self.bias)#1->2
         self.UpSampleRatio_47 = UpSampleRatio_4(1 * self.features,ratio=2**(-2),use_bias=self.bias)#0->2
-        self.stage_2_decoder_block_2 = UNetDecoderBlock(cin=4*self.features, num_channels=(2**2)*self.features,num_groups=self.num_groups,lrelu_slope=self.lrelu_slope,
+        self.stage_2_decoder_block_2 = UNetDecoderBlock(cin=4*self.features, num_channels=(2**2)*self.features,lrelu_slope=self.lrelu_slope,
             block_size=self.block_size_hr if 2 < self.high_res_stages else self.block_size_lr,
             grid_size=self.grid_size_hr if 2 < self.high_res_stages else self.block_size_lr,
             block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
@@ -981,7 +972,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.UpSampleRatio_48 = UpSampleRatio_1_2(4 * self.features,ratio=2**(1),use_bias=self.bias)#2->1
         self.UpSampleRatio_49 = UpSampleRatio(2 * self.features,ratio=2**(0),use_bias=self.bias)#1->1
         self.UpSampleRatio_50 = UpSampleRatio_2(1 * self.features,ratio=2**(-1),use_bias=self.bias)#0->1
-        self.stage_2_decoder_block_1 = UNetDecoderBlock(cin=4*self.features, num_channels=(2**1)*self.features,num_groups=self.num_groups,lrelu_slope=self.lrelu_slope,
+        self.stage_2_decoder_block_1 = UNetDecoderBlock(cin=4*self.features, num_channels=(2**1)*self.features,lrelu_slope=self.lrelu_slope,
             block_size=self.block_size_hr if 1 < self.high_res_stages else self.block_size_lr,
             grid_size=self.grid_size_hr if 1 < self.high_res_stages else self.block_size_lr,
             block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
@@ -991,7 +982,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.UpSampleRatio_51 = UpSampleRatio_1_4(4 * self.features,ratio=4,use_bias=self.bias)#2->0
         self.UpSampleRatio_52 = UpSampleRatio_1_2(2 * self.features,ratio=2,use_bias=self.bias)#1->0
         self.UpSampleRatio_53 = UpSampleRatio(1 * self.features,ratio=1,use_bias=self.bias)#0->0
-        self.stage_2_decoder_block_0 = UNetDecoderBlock(cin=2*self.features,num_channels=self.features,num_groups=self.num_groups,lrelu_slope=self.lrelu_slope,
+        self.stage_2_decoder_block_0 = UNetDecoderBlock(cin=2*self.features,num_channels=self.features,lrelu_slope=self.lrelu_slope,
             block_size=self.block_size_hr if 0 < self.high_res_stages else self.block_size_lr,
             grid_size=self.grid_size_hr if 0 < self.high_res_stages else self.block_size_lr,
             block_gmlp_factor=self.block_gmlp_factor,grid_gmlp_factor=self.grid_gmlp_factor,input_proj_factor=self.input_proj_factor,
@@ -999,7 +990,6 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
         self.stage_2_output_conv_0 = nn.Conv2d((2**(0))*self.features,self.num_outputs,kernel_size=(3,3), bias=self.bias,padding=1)
 
     def forward(self, x):
-        n, c, h, w = x.shape
         shortcuts = []
         shortcuts.append(x)  #to store multiscale input images
         # Get multi-scale input images
@@ -1058,11 +1048,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
                 signal2 = self.UpSampleRatio_2(encs[2])
                 signal = torch.cat([signal0,signal1,signal2],dim=1)
                 # Use cross-gating to cross modulate features
-                if self.use_cross_gating:
-                    skips, global_feature = self.stage_0_cross_gating_block_2(signal, global_feature)
-                else:
-                    skips = self.conv7(signal)
-                    skips = self.conv8(skips)
+                skips, global_feature = self.stage_0_cross_gating_block_2(signal, global_feature)
                 skip_features.append(skips)
             elif i == 1:
                 # get multi-scale skip signals from cross-gating block
@@ -1071,11 +1057,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
                 signal2 = self.UpSampleRatio_5(encs[2])
                 signal = torch.cat([signal0, signal1, signal2], dim=1)
                 # Use cross-gating to cross modulate features
-                if self.use_cross_gating:
-                    skips, global_feature = self.stage_0_cross_gating_block_1(signal, global_feature)
-                else:
-                    skips = self.conv9(signal)
-                    skips = self.conv10(skips)
+                skips, global_feature = self.stage_0_cross_gating_block_1(signal, global_feature)
                 skip_features.append(skips)
             elif i == 0:
                 # get multi-scale skip signals from cross-gating block
@@ -1084,11 +1066,7 @@ class MAXIM_dns_3s(nn.Module):  #input shape: n, c, h, w
                 signal2 = self.UpSampleRatio_8(encs[2])
                 signal = torch.cat([signal0,signal1,signal2],dim=1)
                 # Use cross-gating to cross modulate features
-                if self.use_cross_gating:
-                    skips, global_feature = self.stage_0_cross_gating_block_0(signal, global_feature)
-                else:
-                    skips = self.conv11(signal)
-                    skips = self.conv12(skips)
+                skips, global_feature = self.stage_0_cross_gating_block_0(signal, global_feature)
                 skip_features.append(skips)
         
         # start decoder. Multi-scale feature fusion of cross-gated features
